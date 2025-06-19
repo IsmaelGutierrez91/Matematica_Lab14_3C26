@@ -1,22 +1,23 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.InputSystem;
-
+using UnityEngine.SceneManagement;
 public class PlayerControler : MonoBehaviour
 {
     [SerializeField] private float Force;
     [SerializeField] private float ForceJump;
     [SerializeField] private Rigidbody RB;
-    [SerializeField] private bool CanJump;
+    [SerializeField] private int Lifes = 10;
+   
     private void Start()
     {
         RB = GetComponent<Rigidbody>();
     }
     private void Update()
     {
-        if (Physics.Raycast(transform.position,Vector3.down*2))
+        if (Lifes<= 0)
         {
-            CanJump = true;
+            SceneManager.LoadScene("Menu");
         }
     }
     public void MovementHorizontal(InputAction.CallbackContext context)
@@ -29,9 +30,25 @@ public class PlayerControler : MonoBehaviour
     public void Jump(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
-        if (!CanJump) return;
-        RB.AddForce(new Vector3(0,ForceJump,0));
-        CanJump = false;
+
+        Physics.gravity = Physics.gravity * -1;
+
+
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            Lifes -= 1;
+        }
+        if (other.CompareTag("Die"))
+        {
+            Lifes -= Lifes;
+        }
+        if (other.CompareTag("win"))
+        {
+            SceneManager.LoadScene("Menu");
+        }
     }
 }
 
